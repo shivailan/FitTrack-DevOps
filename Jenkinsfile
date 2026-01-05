@@ -1,16 +1,23 @@
 pipeline {
     agent any
-    
+
+    // Paramètres obligatoires demandés au lancement du build 
     parameters {
-        // La taille est obligatoire via Jenkins Parameters pour le calcul IMC [cite: 29, 35]
-        string(name: 'TAILLE', defaultValue: '1.75', description: 'Taille en mètres (ex: 1.75) - Obligatoire')
-        string(name: 'NOM', defaultValue: 'Utilisateur', description: 'Nom de l’utilisateur')
+        string(name: 'TAILLE', defaultValue: '1.75', description: 'Taille en mètres (ex: 1.75) - Obligatoire pour le calcul IMC')
+        string(name: 'NOM', defaultValue: 'Utilisateur', description: 'Nom de l’utilisateur pour le rapport PDF')
     }
 
     stages {
+        stage('Checkout') {
+            steps {
+                // Récupération du code depuis GitHub [cite: 59]
+                checkout scm
+            }
+        }
+
         stage('Installation') {
             steps {
-                // Utilisation d'un venv pour éviter les erreurs de permissions [cite: 60]
+                // Création de l'environnement virtuel et installation des dépendances [cite: 60]
                 sh '''
                 python3 -m venv venv
                 ./venv/bin/pip install --upgrade pip
@@ -18,25 +25,28 @@ pipeline {
                 '''
             }
         }
-        
+
         stage('Tests') {
             steps {
-                // Tests du calcul IMC obligatoire [cite: 35, 61]
-                sh './venv/bin/pytest tests/'
+                // Exécution des tests unitaires avec export du chemin pour trouver app.py [cite: 61]
+                sh '''
+                export PYTHONPATH=.
+                ./venv/bin/pytest tests/
+                '''
             }
         }
-        
+
         stage('Génération Rapport PDF') {
             steps {
-                // Génération du rapport PDF incluant le journal Mars-Mai [cite: 40, 62]
+                // Script Python générant le rapport PDF avec les paramètres Jenkins [cite: 62]
                 sh "./venv/bin/python generate_pdf.py --taille ${params.TAILLE} --nom ${params.NOM}"
             }
         }
     }
-    
+
     post {
         always {
-            // Publication des artefacts PDF (Exigence 6.1.5) [cite: 63]
+            // Publication des artefacts (PDF) et des logs d'exécution [cite: 63]
             archiveArtifacts artifacts: '*.pdf', fingerprint: true
         }
     }
