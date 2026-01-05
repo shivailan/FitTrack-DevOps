@@ -8,8 +8,8 @@ def get_db_connection():
     return psycopg2.connect(
         host="localhost",
         database="fittrack",
-        user="postgres",
-        password="ton_password"
+        user="shiva",
+        password=""
     )
 
 def calculer_imc(poids, taille):
