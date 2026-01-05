@@ -11,7 +11,7 @@ args = parser.parse_args()
 
 # 2. Connexion à la base de données
 def fetch_data():
-    conn = psycopg2.connect(host="localhost", database="fittrack", user="postgres", password="ton_password")
+    conn = psycopg2.connect(host="localhost", database="fittrack", user="shiva", password="")
     cur = conn.cursor()
     
     # Récupération du suivi poids/IMC (Période Mars à Mai exigée)

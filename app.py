@@ -1,17 +1,13 @@
+from flask import Flask, request
 import psycopg2
-from flask import Flask, render_template, request
 
 app = Flask(__name__)
 
-# Configuration de la connexion (à adapter avec tes accès)
-def get_db_connection():
-    return psycopg2.connect(
-        host="localhost",
-        database="fittrack",
-        user="postgres",
-        password=""
-    )
+# Connexion BDD [cite: 19]
+def get_db():
+    return psycopg2.connect(host="localhost", database="fittrack", user="shiva", password="")
 
+# Calcul IMC obligatoire [cite: 35, 37, 38]
 def calculer_imc(poids, taille):
     imc = poids / (taille ** 2)
     if imc < 18.5: cat = "Insuffisance"
@@ -21,34 +17,26 @@ def calculer_imc(poids, taille):
     return round(imc, 2), cat
 
 @app.route('/', methods=['GET', 'POST'])
-def index():
+def home():
     if request.method == 'POST':
         poids = float(request.form['poids'])
         taille = float(request.form['taille'])
-        date_saisie = request.form['date'] # Pour pouvoir remplir Mars à Mai
+        date = request.form['date']
+        imc, cat = calculer_imc(poids, taille)
         
-        imc, categorie = calculer_imc(poids, taille)
-        
-        # Enregistrement obligatoire en base (Exigence 4.3 & 5)
-        conn = get_db_connection()
+        # Stockage IMC + Catégorie obligatoire [cite: 39]
+        conn = get_db()
         cur = conn.cursor()
-        cur.execute(
-            "INSERT INTO weight_logs (date_rec, poids, imc, categorie_imc) VALUES (%s, %s, %s, %s)",
-            (date_saisie, poids, imc, categorie)
-        )
+        cur.execute("INSERT INTO weight_logs (date_rec, poids, imc, categorie_imc) VALUES (%s, %s, %s, %s)", (date, poids, imc, cat))
         conn.commit()
-        cur.close()
-        conn.close()
-        
-    return '''
-        <h1>FitTrack - Saisie Quotidienne</h1>
-        <form method="post">
-            Date: <input type="date" name="date" required><br>
-            Poids (kg): <input type="number" step="0.1" name="poids" required><br>
-            Taille (m): <input type="number" step="0.01" name="taille" value="1.75" required><br>
-            <button type="submit">Enregistrer</button>
-        </form>
-    '''
+        return f"Enregistré : IMC {imc} ({cat})"
+    
+    return '''<form method="post">
+        Date: <input type="date" name="date"><br>
+        Poids: <input type="number" step="0.1" name="poids"><br>
+        Taille: <input type="number" step="0.01" name="taille" value="1.75"><br>
+        <input type="submit">
+    </form>'''
 
 if __name__ == '__main__':
     app.run(debug=True)
