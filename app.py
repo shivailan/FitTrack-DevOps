@@ -8,7 +8,7 @@ def get_db_connection():
     return psycopg2.connect(
         host="localhost",
         database="fittrack",
-        user="shiva",
+        user="postgres",
         password=""
     )
 
