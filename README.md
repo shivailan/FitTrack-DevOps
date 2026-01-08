@@ -1,6 +1,8 @@
 🥗 FitTrack DevOps - Suivi Minceur
 Projet de validation CI/CD et Agilité
 
+Lien JIRA : https://shivailan.atlassian.net/jira/software/projects/FV/boards/3?atlOrigin=eyJpIjoiZmQ3MGI0M2IyODNmNDBiYzg1ZmNmYmYyYThiZjRiZTMiLCJwIjoiaiJ9
+
 Ce projet est une application MVP (Minimum Viable Product) de suivi de santé permettant de calculer l'IMC, d'enregistrer le poids et les repas, et de générer des rapports automatisés.
 
 🚀 Fonctionnalités
